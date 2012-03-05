@@ -5,6 +5,8 @@
 // To begin using Litebox, you need jQuery, Zepto.js,
 // or Ender, the litebox script, and the CSS provided with
 // litebox. Most of the styling can be customizable via CSS.
+//
+// You can find the [source on GitHub](http://github.com/tim-evans/lightbox).
 (function (window, $) {
 
 
