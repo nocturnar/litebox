@@ -1,0 +1,38 @@
+.litebox {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  float: left;
+  margin: 5px;
+}
+
+.litebox img {
+  position: absolute;
+}
+
+.litebox-pane,
+.litebox-modal-pane {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.litebox-pane .litebox {
+  z-index: 100;
+}
+
+.litebox-pane {
+  z-index: 500;
+}
+
+.litebox-pane .litebox {
+  position: fixed !important;
+}
+
+.litebox-modal-pane {
+  background-color: #FFF;
+  opacity: .9;
+  filter: alpha(opacity=90);
+}
