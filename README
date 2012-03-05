@@ -5,3 +5,7 @@
 Litebox is a yet another lightbox implementation that supports configuration completely in HTML with minimal markup, with support for image slicing and scaling.
 
 http://tim-evans.github.com/litebox/docs
+
+To see it in action, go to:
+
+http://tim-evans.github.com/litebox/examples
