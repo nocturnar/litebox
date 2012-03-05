@@ -1,0 +1,427 @@
+<!DOCTYPE html>  <html> <head>   <title>litebox.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               litebox.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p><strong>Litebox</strong> is a simple lightbox requires minimal
+markup, and is designed to be simple to use
+and configure <em>without</em> any knowledge of JavaScript.</p>
+
+<p>To begin using Litebox, you need jQuery, Zepto.js,
+or Ender, the litebox script, and the CSS provided with
+litebox. Most of the styling can be customizable via CSS.</p>
+
+<p>You can find the <a href="http://github.com/tim-evans/lightbox">source on GitHub</a>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nb">window</span><span class="p">,</span> <span class="nx">$</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>The <code>layer</code> is the DOMElement that should be
+turned into a lightbox. Inside the <code>layer</code> is
+assumed to be a single <code>&lt;img&gt;</code> tag.</p>
+
+<p>The <code>pane</code> is the <code>Litebox.Pane</code> that will be
+shown when the <code>layer</code> is clicked.</p>
+
+<p><code>params</code> is an object hash of options that provides
+information as to how to render the lightbox.
+Accepted parameters are:</p>
+
+<ul>
+<li><p><code>duration</code>: how long it should take for
+            the lightbox to animate.</p>
+
+<p>These are all equivalent durations:
+ <code>".2s"</code>, <code>"200ms"</code>, <code>200</code></p></li>
+<li><p><code>scale</code>: the amount the image should
+         be scaled when viewed as a
+         thumbnail.</p>
+
+<p>Scales can be written as <code>"50%"</code> or <code>.5</code>.</p></li>
+<li><p><code>layout</code>: a CSS layout that provides
+          clipping and sizing information
+          for a thumbnail.</p>
+
+<p>Layouts can take positioning and sizing
+ parameters, and are written like inline
+ CSS <code>style</code> attributes (ie. <code>"left: 0px; width: 200px"</code>)</p>
+
+<p><code>left</code>, <code>right</code>, <code>bottom</code>, <code>top</code>, <code>width</code>, and <code>height</code>
+ are the normal CSS attributes that can
+ be used in the layout. These can have
+ units of <code>em</code>, <code>px</code>, or <code>%</code>.</p>
+
+<p>In addition to these parameters, <code>centerX</code>
+ and <code>centerY</code> are available to use to
+ center an image with an offset from the
+ either the center of the x axis or y axis.</p></li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Litebox</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">layer</span><span class="p">,</span> <span class="nx">pane</span><span class="p">,</span> <span class="nx">params</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">$layer</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">layer</span><span class="p">),</span>
+      <span class="nx">$img</span> <span class="o">=</span> <span class="nx">$layer</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">),</span>
+      <span class="nx">img</span> <span class="o">=</span> <span class="nx">$img</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+      <span class="nx">thumbnailSize</span> <span class="o">=</span> <span class="p">{};</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Lazily instantiate <code>Litebox.lightboxes</code>
+for easy access to Lightboxes on screen
+via a id lookup.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">Litebox</span><span class="p">.</span><span class="nx">lightboxes</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Litebox</span><span class="p">.</span><span class="nx">lightboxes</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">$layer</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">$layer</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;litebox&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">uid</span><span class="o">++</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="nx">Litebox</span><span class="p">.</span><span class="nx">lightboxes</span><span class="p">[</span><span class="nx">$layer</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">layer</span> <span class="o">=</span> <span class="nx">layer</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">pane</span> <span class="o">=</span> <span class="nx">pane</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">duration</span> <span class="o">=</span> <span class="nx">params</span><span class="p">.</span><span class="nx">duration</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">duration</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>Check to see if the duration was written
+in seconds (ie. "2s"), and transform it
+into milliseconds.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="sr">/^(\d|\.)+s$/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">duration</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">duration</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">duration</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>By default, parse the duration as if it
+were milliseconds.
+This means that '200' and '200ms' are
+treated the same</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">duration</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">duration</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">isNaN</span><span class="p">(</span><span class="nx">duration</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">duration</span> <span class="o">=</span> <span class="nx">duration</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">scale</span> <span class="o">=</span> <span class="nx">params</span><span class="p">.</span><span class="nx">scale</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">scale</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Check to see if the scale was written using
+percentages.
+If it was, transform it into it's float representation.
+(ie "50%" -> .5)</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="sr">/^(\d)+%$/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">scale</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">scale</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>By default, parse the scale as-is</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">scale</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">scale</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">isNaN</span><span class="p">(</span><span class="nx">scale</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">scale</span> <span class="o">=</span> <span class="nx">scale</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">var</span> <span class="nx">layout</span> <span class="o">=</span> <span class="p">{},</span>
+      <span class="nx">style</span> <span class="o">=</span> <span class="p">{},</span>
+      <span class="nx">idx</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">,</span> <span class="nx">len</span><span class="p">,</span> <span class="nx">parts</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">layout</span><span class="p">)</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Parse the layout so we can apply the style to the element.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">attrs</span> <span class="o">=</span> <span class="nx">params</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">);</span>
+    <span class="nx">len</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">idx</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">idx</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">parts</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">);</span>
+      <span class="nx">layout</span><span class="p">[</span><span class="nx">trim</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">layout</span> <span class="o">=</span> <span class="nx">layout</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">fullImageStyle</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">thumbnailSize</span> <span class="o">=</span> <span class="nx">thumbnailSize</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>The image should be automatically resized if the
+width and height of the image is not explicitly set.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">resize</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">resize</span> <span class="o">=</span> <span class="o">!</span><span class="nx">layout</span><span class="p">.</span><span class="nx">width</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">layout</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Apply a clipping style to the image if necessary.
+Reverse the offsets so the clipping style refers to
+clipping offsets on the image itself rather than the
+clipping box.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">left</span><span class="p">)</span>   <span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="nx">reverseOffset</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">left</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">right</span><span class="p">)</span>  <span class="nx">style</span><span class="p">.</span><span class="nx">right</span> <span class="o">=</span> <span class="nx">reverseOffset</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">right</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">top</span><span class="p">)</span>    <span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="nx">reverseOffset</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">top</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">bottom</span><span class="p">)</span> <span class="nx">style</span><span class="p">.</span><span class="nx">bottom</span> <span class="o">=</span> <span class="nx">reverseOffset</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">bottom</span><span class="p">);</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">k</span> <span class="k">in</span> <span class="nx">style</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">style</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">k</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">fullImageStyle</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">thumbnailImageStyle</span> <span class="o">=</span> <span class="nx">style</span><span class="p">;</span>
+  <span class="nx">$img</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">style</span><span class="p">);</span>
+
+  <span class="kd">var</span> <span class="nx">imageSize</span><span class="p">,</span>
+      <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>If the image has finished loading, then
+just get the size</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">if</span> <span class="p">(</span><span class="nx">img</span><span class="p">.</span><span class="nx">complete</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span>  <span class="nx">thumbnailSize</span><span class="p">.</span><span class="nx">width</span>  <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="nx">thumbnailSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">layout</span><span class="p">.</span><span class="nx">height</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">imageSize</span> <span class="o">=</span> <span class="nx">sizeLightbox</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">$img</span><span class="p">);</span>
+    <span class="nx">$layer</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">);</span>
+
+    <span class="nx">$layer</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">show</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>Otherwise, we need to wait until the image
+emits an <code>onload</code> event.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">img</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">imageSize</span> <span class="o">=</span> <span class="nx">sizeLightbox</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">$img</span><span class="p">);</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">width</span><span class="o">:</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="nx">self</span><span class="p">.</span><span class="nx">scale</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">height</span><span class="o">:</span> <span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="nx">self</span><span class="p">.</span><span class="nx">scale</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span>
+      <span class="p">});</span>
+      <span class="nx">$layer</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">);</span>
+      <span class="nx">$layer</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">show</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">};</span>
+  <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>If the layer supports key events (it's an anchor tag,
+for instance), then we'd like to show the lightbox
+when the <code>return</code> key is pressed.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">$layer</span><span class="p">.</span><span class="nx">keydown</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">which</span> <span class="o">===</span> <span class="mi">13</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="p">});</span>
+
+  <span class="kd">var</span> <span class="nx">$popup</span> <span class="o">=</span> <span class="nx">$layer</span><span class="p">.</span><span class="nx">clone</span><span class="p">();</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">popupLayer</span> <span class="o">=</span> <span class="nx">$popup</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>Reverses the CSS rule from positive to negative and vice versa.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">reverseOffset</span><span class="p">(</span><span class="nx">rule</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">(</span><span class="nx">rule</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">===</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+         <span class="o">?</span> <span class="nx">rule</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+         <span class="o">:</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nx">rule</span><span class="p">;</span>
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>Size the lightbox according to the image provided
+and options set on the lightbox.</p>
+
+<p>This function assumes that the image has finished loading.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">sizeLightbox</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">,</span> <span class="nx">$img</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">imageSize</span><span class="p">,</span>
+      <span class="nx">img</span> <span class="o">=</span> <span class="nx">$img</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+      <span class="nx">scale</span> <span class="o">=</span> <span class="nx">lightbox</span><span class="p">.</span><span class="nx">scale</span><span class="p">,</span>
+      <span class="nx">style</span><span class="p">,</span>
+      <span class="nx">resetStyle</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>Get the image's actual size</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">imageSize</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">width</span><span class="o">:</span> <span class="nx">img</span><span class="p">.</span><span class="nx">naturalWidth</span> <span class="o">||</span> <span class="nx">img</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+    <span class="nx">height</span><span class="o">:</span> <span class="nx">img</span><span class="p">.</span><span class="nx">naturalHeight</span> <span class="o">||</span> <span class="nx">img</span><span class="p">.</span><span class="nx">height</span>
+  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>If the lightbox should scale to the image inside it,
+we should set the <code>thumbnailSize</code> to be proportional
+to the image scaled according to the <code>scale</code> property.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">if</span> <span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">resize</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">lightbox</span><span class="p">.</span><span class="nx">thumbnailSize</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="nx">width</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="nx">scale</span><span class="p">),</span>
+      <span class="nx">height</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="nx">scale</span><span class="p">)</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">style</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">width</span><span class="o">:</span> <span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">*</span> <span class="nx">scale</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+    <span class="nx">height</span><span class="o">:</span> <span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">*</span> <span class="nx">scale</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span>
+  <span class="p">};</span>
+
+  <span class="nx">resetStyle</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">width</span><span class="o">:</span> <span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+    <span class="nx">height</span><span class="o">:</span> <span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span>
+  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>Center the lightbox image</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="k">if</span> <span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">centerX</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span>
+                             <span class="nx">lightbox</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">centerX</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
+
+    <span class="nx">resetStyle</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">centerY</span> <span class="o">&amp;&amp;</span> <span class="nx">lightbox</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span>
+                             <span class="nx">lightbox</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span>
+                 <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">centerY</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">;</span>
+
+    <span class="nx">resetStyle</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>Adjust the precomputed image styles to adjust
+for image scaling.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">mix</span><span class="p">(</span><span class="nx">style</span><span class="p">).</span><span class="nx">into</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">thumbnailImageStyle</span><span class="p">);</span>
+  <span class="nx">mix</span><span class="p">(</span><span class="nx">resetStyle</span><span class="p">).</span><span class="nx">into</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">.</span><span class="nx">fullImageStyle</span><span class="p">);</span>
+
+  <span class="nx">$img</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">style</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="nx">imageSize</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">Litebox</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>How long it should take the lightbox to
+animate (in milliseconds)</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">duration</span><span class="o">:</span> <span class="mi">500</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>The scale of the image when it's a thumbnail.
+1 means 100% scale.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">scale</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>The layout provided by the user.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">layout</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <p>Whether the image should be resized to fit
+the contents of the lightbox.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">resize</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>A CSS style hash that provides clipping offsets
+and sizing for the thumbnail version of the
+lightbox image.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">thumbnailImageStyle</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <p>A CSS style hash that provides reset values
+to the <code>thumbnailImageStyle</code> so the image
+animates smoothly.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">fullImageStyle</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <p>The size of the lightbox as a thumbnail.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">thumbnailSize</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <p>The full size of the image.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">imageSize</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <p>The <code>DOMElement</code> that has had lightbox properties
+attached to it.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">layer</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <p>The <code>DOMElement</code> that will appear after clicking
+the lightbox thumbnail.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">popupLayer</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <p>A <code>Boolean</code> indicating whether the lightbox is animating.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">isAnimating</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>A <code>Boolean</code> indicating whether lightbox is currently showing.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">isShowing</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>Shows the lightbox by animating the image into
+the center of the screen with an overlay behind it.</p>
+
+<p>Clicking anywhere on the page will dismiss the popup.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">show</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isShowing</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">isShowing</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">$lightbox</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">$window</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nb">window</span><span class="p">),</span>
+        <span class="nx">$popup</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">popupLayer</span><span class="p">),</span>
+        <span class="nx">$pane</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">pane</span><span class="p">.</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">targetStyle</span><span class="p">,</span>
+        <span class="nx">thumbnailStyle</span><span class="p">,</span>
+        <span class="nx">screen</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">height</span><span class="o">:</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerHeight</span>
+                           <span class="o">?</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerHeight</span>
+                           <span class="o">:</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">height</span><span class="p">(),</span>
+                   <span class="nx">width</span><span class="o">:</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerWidth</span>
+                          <span class="o">?</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerWidth</span>
+                          <span class="o">:</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">width</span><span class="p">()</span> <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-33">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-33">&#182;</a>               </div>               <p>Calculated the target layout and home layout
+lazily when asked to show the lightbox for the first time,
+then cache it for use later.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">offset</span> <span class="o">=</span> <span class="nx">$lightbox</span><span class="p">.</span><span class="nx">offset</span><span class="p">();</span>
+    <span class="nx">thumbnailStyle</span> <span class="o">=</span> <span class="nx">mix</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">,</span> <span class="p">{</span>
+      <span class="nx">top</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">offset</span><span class="p">.</span><span class="nx">top</span><span class="p">)</span> <span class="o">-</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">(),</span>
+      <span class="nx">left</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">offset</span><span class="p">.</span><span class="nx">left</span><span class="p">)</span> <span class="o">-</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">()</span>
+    <span class="p">}).</span><span class="nx">into</span><span class="p">({</span>
+      <span class="nx">marginTop</span><span class="o">:</span> <span class="s1">&#39;0px&#39;</span><span class="p">,</span>
+      <span class="nx">marginLeft</span><span class="o">:</span> <span class="s1">&#39;0px&#39;</span>
+    <span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <p>Calculate the center of the screen in pixels</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">targetStyle</span> <span class="o">=</span> <span class="nx">mix</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">imageSize</span><span class="p">).</span><span class="nx">into</span><span class="p">({</span>
+      <span class="nx">top</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">,</span>
+      <span class="nx">left</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">,</span>
+      <span class="nx">marginTop</span><span class="o">:</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">,</span>
+      <span class="nx">marginLeft</span><span class="o">:</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">imageSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+    <span class="p">});</span>
+
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="nx">thumbnailStyle</span><span class="p">);</span>
+    <span class="nx">$pane</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">$popup</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <p>Bind events to close the popup when the user clicks anywhere
+on the screen.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="nx">$pane</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.litebox-modal-pane&#39;</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">hide</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">hide</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">pane</span><span class="p">.</span><span class="nx">show</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <p>Allow the <code>escape</code> key to dismiss the pane.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">$window</span><span class="p">.</span><span class="nx">keydown</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">keyDown</span><span class="p">);</span>
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">animate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">fullImageStyle</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">);</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">isAnimating</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">animate</span><span class="p">(</span><span class="nx">targetStyle</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">isAnimating</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">);</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">top</span><span class="o">:</span> <span class="s1">&#39;50%&#39;</span><span class="p">,</span>
+        <span class="nx">left</span><span class="o">:</span> <span class="s1">&#39;50%&#39;</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-37">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-37">&#182;</a>               </div>               <p>Called when any keys are pressed when the lightbox is visible.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">keyDown</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">evt</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">which</span> <span class="o">===</span> <span class="mi">27</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">evt</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <p>Hides the popup pane by animating the image back to the
+where the thumbnail is in the DOM.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">hide</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isShowing</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">$popup</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">popupLayer</span><span class="p">),</span>
+        <span class="nx">$lightbox</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">$pane</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">pane</span><span class="p">.</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">$window</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nb">window</span><span class="p">),</span>
+        <span class="nx">thumbnailStyle</span><span class="p">,</span>
+        <span class="nx">screen</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">height</span><span class="o">:</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerHeight</span>
+                           <span class="o">?</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerHeight</span>
+                           <span class="o">:</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">height</span><span class="p">(),</span>
+                   <span class="nx">width</span><span class="o">:</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerWidth</span>
+                          <span class="o">?</span> <span class="nb">window</span><span class="p">.</span><span class="nx">innerWidth</span>
+                          <span class="o">:</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">width</span><span class="p">()</span> <span class="p">},</span>
+        <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <p>Center the image so the animation is smooth.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="kd">var</span> <span class="nx">offset</span> <span class="o">=</span> <span class="nx">$lightbox</span><span class="p">.</span><span class="nx">offset</span><span class="p">();</span>
+    <span class="nx">thumbnailStyle</span> <span class="o">=</span> <span class="nx">mix</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">thumbnailSize</span><span class="p">,</span> <span class="p">{</span>
+      <span class="nx">top</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">offset</span><span class="p">.</span><span class="nx">top</span><span class="p">)</span> <span class="o">-</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">(),</span>
+      <span class="nx">left</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">offset</span><span class="p">.</span><span class="nx">left</span><span class="p">)</span> <span class="o">-</span> <span class="nx">$window</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">()</span>
+    <span class="p">}).</span><span class="nx">into</span><span class="p">({</span>
+      <span class="nx">marginTop</span><span class="o">:</span> <span class="s1">&#39;0px&#39;</span><span class="p">,</span>
+      <span class="nx">marginLeft</span><span class="o">:</span> <span class="s1">&#39;0px&#39;</span>
+    <span class="p">});</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">pane</span><span class="p">.</span><span class="nx">hide</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">);</span>
+
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isAnimating</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">left</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span><span class="p">,</span>
+        <span class="nx">top</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">screen</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+      <span class="p">});</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">stop</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;img&#39;</span><span class="p">).</span><span class="nx">animate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">thumbnailImageStyle</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">);</span>
+    <span class="nx">$window</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="s1">&#39;keydown&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">keyDown</span><span class="p">);</span>
+
+    <span class="nx">$popup</span><span class="p">.</span><span class="nx">animate</span><span class="p">(</span><span class="nx">thumbnailStyle</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">duration</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">isShowing</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
+      <span class="nx">$popup</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">);</span>
+      <span class="nx">$pane</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.litebox-modal-pane&#39;</span><span class="p">).</span><span class="nx">unbind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-40">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-40">&#182;</a>               </div>               <p>A pane that holds any popup clones and will be the
+first to recieve mouse events.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Litebox</span><span class="p">.</span><span class="nx">Pane</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">parent</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">paneID</span> <span class="o">=</span> <span class="s1">&#39;pane-&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">uid</span><span class="o">++</span><span class="p">),</span>
+      <span class="nx">$pane</span><span class="p">,</span> <span class="nx">$modal</span><span class="p">;</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="nx">parent</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;&lt;div class=&quot;litebox-pane&quot; id=&quot;&#39;</span> <span class="o">+</span> <span class="nx">paneID</span> <span class="o">+</span> <span class="s1">&#39;&quot;&gt;&#39;</span> <span class="o">+</span>
+                        <span class="s1">&#39;&lt;div class=&quot;litebox-modal-pane&quot;&gt;&lt;/div&gt;&#39;</span> <span class="o">+</span>
+                        <span class="s1">&#39;&lt;/div&gt;&#39;</span><span class="p">);</span>
+  <span class="nx">$pane</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="nx">paneID</span><span class="p">);</span>
+  <span class="nx">$modal</span> <span class="o">=</span> <span class="nx">$pane</span><span class="p">.</span><span class="nx">children</span><span class="p">();</span>
+  <span class="nx">$pane</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">_opacity</span> <span class="o">=</span> <span class="nx">$modal</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;opacity&#39;</span><span class="p">);</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">layer</span> <span class="o">=</span> <span class="nx">$pane</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="p">};</span>
+
+<span class="nx">Litebox</span><span class="p">.</span><span class="nx">Pane</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-41">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-41">&#182;</a>               </div>               <p>A <code>Boolean</code> indicating whether the pane
+is currently animating</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">isAnimating</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span></pre></div>             </td>           </tr>                               <tr id="section-42">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-42">&#182;</a>               </div>               <p>Hides the pane taking <code>duration</code> milliseconds to do so</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">hide</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">duration</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">layer</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">layer</span><span class="p">,</span>
+        <span class="nx">$pane</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">$modal</span> <span class="o">=</span> <span class="nx">$pane</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.litebox-modal-pane&#39;</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isAnimating</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">$modal</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nx">$modal</span><span class="p">.</span><span class="nx">animate</span><span class="p">({</span>
+      <span class="nx">opacity</span><span class="o">:</span> <span class="mi">0</span>
+    <span class="p">},</span> <span class="nx">duration</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">$pane</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+    <span class="p">});</span>
+  <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-43">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-43">&#182;</a>               </div>               <p>Shows the pane taking <code>duration</code> milliseconds to do so</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">show</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">duration</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">layer</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">layer</span><span class="p">,</span>
+        <span class="nx">$pane</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">layer</span><span class="p">),</span>
+        <span class="nx">$modal</span> <span class="o">=</span> <span class="nx">$pane</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.litebox-modal-pane&#39;</span><span class="p">),</span>
+        <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+    <span class="nx">self</span><span class="p">.</span><span class="nx">isAnimating</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">$pane</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+    <span class="nx">$modal</span><span class="p">.</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;opacity&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="nx">$modal</span><span class="p">.</span><span class="nx">animate</span><span class="p">({</span>
+      <span class="nx">opacity</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">_opacity</span>
+    <span class="p">},</span> <span class="nx">duration</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">isAnimating</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-44">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-44">&#182;</a>               </div>               <p>Unique identifier for lightbox elements</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">uid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-45">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-45">&#182;</a>               </div>               <p>Trim a string's leading and trailing
+whitespace.</p>
+
+<pre><code>trim.call(' Personal space   ');
+// -&gt; 'Personal space'
+</code></pre>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">trim</span> <span class="o">=</span> <span class="nb">String</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">trim</span> <span class="o">||</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\S+(?:\s+\S+)*/</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">s</span> <span class="o">?</span> <span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-46">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-46">&#182;</a>               </div>               <p>Internal function to mix the arguments
+passed in into the target object.</p>
+
+<p>For example:</p>
+
+<pre><code>var o = {};
+mix({
+  foo: 'bar'
+}).into(o);
+
+assert(o.foo === 'bar');
+</code></pre>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">mix</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">mixins</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">,</span>
+      <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">mixins</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="nx">into</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">mixin</span><span class="p">,</span> <span class="nx">key</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">mixin</span> <span class="o">=</span> <span class="nx">mixins</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nx">key</span> <span class="k">in</span> <span class="nx">mixin</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">target</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">mixin</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">target</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-47">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-47">&#182;</a>               </div>               <p>When the document is ready, look for every
+element with the class <code>litebox</code>, extract
+parameters written as <code>data-</code> attributes and
+create a new lightbox.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">pane</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Litebox</span><span class="p">.</span><span class="nx">Pane</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]);</span>
+
+  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.litebox&#39;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">idx</span><span class="p">,</span> <span class="nx">lightbox</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">new</span> <span class="nx">Litebox</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">,</span> <span class="nx">pane</span><span class="p">,</span> <span class="nx">$</span><span class="p">(</span><span class="nx">lightbox</span><span class="p">).</span><span class="nx">data</span><span class="p">());</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nb">window</span><span class="p">.</span><span class="nx">Litebox</span> <span class="o">=</span> <span class="nx">Litebox</span><span class="p">;</span>
+
+<span class="p">}(</span><span class="k">this</span><span class="p">,</span> <span class="nx">$</span> <span class="o">||</span> <span class="nx">jQuery</span><span class="p">));</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
